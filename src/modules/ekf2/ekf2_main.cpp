@@ -288,6 +288,9 @@ void Ekf2::task_main()
 	airspeed_s airspeed = {};
 	vehicle_control_mode_s vehicle_control_mode = {};
 
+	// XXX temporary counter for testing
+	uint64_t counter = 0;
+
 	while (!_task_should_exit) {
 		int ret = px4_poll(fds, sizeof(fds) / sizeof(fds[0]), 1000);
 
@@ -574,7 +577,8 @@ void Ekf2::task_main()
 		bool publish_replay_message = (bool)_param_record_replay_msg->get();
 		if (publish_replay_message) {
 			struct ekf2_replay_s replay = {};
-			replay.time_ref = now;
+			replay.time_ref = counter;
+			counter++;
 			replay.gyro_integral_dt = sensors.gyro_integral_dt[0];
 			replay.accelerometer_integral_dt = sensors.accelerometer_integral_dt[0];
 			replay.magnetometer_timestamp = sensors.magnetometer_timestamp[0];

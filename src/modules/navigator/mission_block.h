@@ -45,6 +45,9 @@
 
 #include <navigator/navigation.h>
 
+#include <controllib/blocks.hpp>
+#include <controllib/block/BlockParam.hpp>
+
 #include <uORB/topics/mission.h>
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/position_setpoint_triplet.h>
@@ -77,6 +80,8 @@ protected:
 	 * Reset all reached flags
 	 */
 	void reset_mission_item_reached();
+
+	bool item_contains_position(const struct mission_item_s *item);
 
 	/**
 	 * Convert a mission item to a position setpoint
@@ -116,14 +121,19 @@ protected:
 	 */
 	void mission_item_to_vehicle_command(const struct mission_item_s *item, struct vehicle_command_s *cmd);
 
+	void issue_command(const struct mission_item_s *item);
+
 	mission_item_s _mission_item;
 	bool _waypoint_position_reached;
 	bool _waypoint_yaw_reached;
 	hrt_abstime _time_first_inside_orbit;
+	hrt_abstime _action_start;
 
 	actuator_controls_s _actuators;
 	orb_advert_t    _actuator_pub;
 	orb_advert_t	_cmd_pub;
+	control::BlockParamInt _param_vtol_wv_land;
+	control::BlockParamInt _param_vtol_wv_loiter;
 };
 
 #endif

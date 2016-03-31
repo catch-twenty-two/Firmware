@@ -43,7 +43,7 @@
 #include <controllib/blocks.hpp>
 #include <controllib/block/BlockParam.hpp>
 #include <lib/mathlib/math/Vector.hpp>
-
+#include <lib/mathlib/math/Matrix.hpp>
 #include "navigator_mode.h"
 #include "mission_block.h"
 
@@ -63,7 +63,8 @@ private:
 	static constexpr int TARGET_TIMEOUT_S = 5;
 	static constexpr int TARGET_ACCEPTANCE_RADIUS_M = 5;
 	static constexpr int INTERPOLATION_PNTS = 20;
-	static constexpr float FF_K = .15f;
+	static constexpr float FF_K = .40F;
+	static constexpr float OFFSET_M = 8;
 
 	enum FollowTargetState {
 		TRACK_POSITION,
@@ -85,10 +86,11 @@ private:
 	math::Vector<3> _step_vel;
 	math::Vector<3> _target_vel;
 	math::Vector<3> _target_distance;
+	math::Vector<3> _target_position_offset;
 
 	follow_target_s _current_target_motion;
 	follow_target_s _previous_target_motion;
-
+	math::Matrix<3,3> _rot_matrix;
 	void track_target_position();
 	void track_target_velocity();
 	bool target_velocity_valid();

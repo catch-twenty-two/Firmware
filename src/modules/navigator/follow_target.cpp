@@ -61,6 +61,7 @@ FollowTarget::FollowTarget(Navigator *navigator, const char *name) :
 	_navigator(navigator),
 	_param_min_alt(this, "MIS_TAKEOFF_ALT", false),
 	_follow_target_state(WAIT_FOR_TARGET_POSITION),
+	_follow_target_position(FOLLOW_FROM_BEHIND),
 	_follow_target_sub(-1),
 	_step_time_in_ms(0.0f),
 	_target_updates(0),
@@ -75,23 +76,7 @@ FollowTarget::FollowTarget(Navigator *navigator, const char *name) :
 	_target_distance.zero();
 	_target_position_offset.zero();
 
-//	float follow_r[9] = {0.0F,  -1.0F, 0.0F,
-//			 	 	 	 1.0F,   0.0F, 0.0F,
-//						 0.0F,   0.0F, 1.0F};
-//
-//	float follow_b[9] = {-1.0F,  0.0F, 0.0F,
-//			 	 	 	 0.0F,   -1.0F, 0.0F,
-//						 0.0F,   0.0F, 1.0F};
-//
-//	float follow_f[9] = {1.0F,   0.0F, 0.0F,
-//				 	 	 0.0F,   1.0F, 0.0F,
-//						 0.0F,   0.0F, 1.0F};
-
-	float follow_l[9] = {0.0F,   1.0F, 0.0F,
-				 	 	-1.0F,   0.0F, 0.0F,
-						 0.0F,   0.0F, 1.0F};
-
-	_rot_matrix = (follow_l);
+	_rot_matrix = (_follow_position_matricies[_follow_target_position]);
 }
 
 FollowTarget::~FollowTarget()
@@ -183,7 +168,6 @@ void FollowTarget::on_active()
 
 		_target_position_offset = _rot_matrix*(target_position.normalized()*OFFSET_M);
 
-		//_target_position_offset = _rot_matrix*_target_position_offset;
 
 		// update the average velocity of the target based on the position
 
@@ -216,10 +200,11 @@ void FollowTarget::on_active()
 				(double) yaw_angle,
 				_follow_target_state);
 
-		yaw_angle = get_bearing_to_next_waypoint(_navigator->get_global_position()->lat,
-												 _navigator->get_global_position()->lon,
-												 _current_target_motion.lat,
-												 _current_target_motion.lon);
+
+			yaw_angle = get_bearing_to_next_waypoint(_navigator->get_global_position()->lat,
+													 _navigator->get_global_position()->lon,
+													 _current_target_motion.lat,
+													 _current_target_motion.lon);
 	}
 
 	// update state machine

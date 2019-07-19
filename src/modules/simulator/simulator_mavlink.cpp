@@ -588,7 +588,16 @@ void Simulator::poll_topics()
 			unsigned int silence;
 		} tune_info = {};
 
-		_tunes.get_next_tune(tune_info.frequency, tune_info.duration, tune_info.silence);
+		_tunes.get_next_note(tune_info.frequency, tune_info.duration, tune_info.silence);
+
+		// Check if circuit breaker is enabled.
+		if (_cbrk == CBRK_UNINIT) {
+			_cbrk = circuit_breaker_enabled("CBRK_BUZZER", CBRK_BUZZER_KEY);
+		}
+
+		if (_cbrk != CBRK_OFF) {
+			return;
+		}
 
 		memcpy(tune_msg.tune, &tune_info, sizeof(tune_msg.tune));
 		mavlink_msg_play_tune_encode(0, 50, &message, &tune_msg);
